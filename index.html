@@ -312,7 +312,7 @@
 
   <div class="card" style="border-top:3px solid var(--teal);">
     <h2><span class="step-num">4</span> Sunumu Oluştur — Modül 1 + Modül 4 (Yeni Tasarım, İki Sayfa)</h2>
-    <p class="desc">Her istasyon için iki slayt üretir: <b>1. sayfa</b> Modül 1 (Detaylı sayfası) grafikleri; <b>2. sayfa</b> Modül 4'ten Hastane Teslim, Akıllı Bileklik ve Vaka Kapatma oranlarının 3 aylık özeti. Oranlar büyük punto ile ve eşiğe göre renklendirilerek yazılır: <span style="color:#2f9e52;font-weight:700;">%95–100 yeşil</span>, <span style="color:#c98a1f;font-weight:700;">%90–95 sarı</span>, <span style="color:#c0392b;font-weight:700;">%90 altı kırmızı</span>. Slayt sırası, en güncel ayın Modül 1 Excel'indeki istasyon sırasını izler.</p>
+    <p class="desc">Her istasyon için iki slayt üretir: <b>1. sayfa</b> Modül 1 (Detaylı sayfası) grafikleri; <b>2. sayfa</b> Modül 4'ten Hastane Teslim, Akıllı Bileklik ve Vaka Kapatma oranlarının 3 aylık özeti. Oranlar büyük punto ile ve eşiğe göre renklendirilerek yazılır: <span style="color:#2f9e52;font-weight:700;">%95–100 yeşil</span>, <span style="color:#d4a017;font-weight:700;">%90–95 sarı</span>, <span style="color:#c0392b;font-weight:700;">%90 altı kırmızı</span>. Slayt sırası, en güncel ayın Modül 1 Excel'indeki istasyon sırasını izler.</p>
     <div class="template-inline" style="margin-bottom:14px;">
       <button class="btn-tpl" id="templatePick2Btn" type="button">🗂️ Şablon Sunum: <span id="template2Name">Varsayılan şablon (2 sayfalı, yeni tasarım)</span></button>
       <button class="btn-danger-ghost" id="template2ResetBtn" type="button" style="display:none;">Varsayılana Dön</button>
@@ -1270,7 +1270,7 @@ async function reorderSlidePairs(zip, orderCodes){
 function colorForOran(v){
   if(v == null) return '999999';
   if(v >= 95) return '2f9e52';
-  if(v >= 90) return 'c98a1f';
+  if(v >= 90) return 'd4a017';
   return 'c0392b';
 }
 
@@ -1331,7 +1331,7 @@ function widthForOran(v, trackWidthEmu){
 function colorForReaksiyon(v){
   if(v == null) return '999999';
   if(v <= 2) return '2f9e52';
-  if(v <= 5) return 'c98a1f';
+  if(v <= 5) return 'd4a017';
   return 'c0392b';
 }
 
@@ -1347,13 +1347,13 @@ const REAKSIYON_TRACK_WIDTH_EMU = 5863397;
 function colorForCount(v){
   if(v == null) return '999999';
   if(v === 0) return '2f9e52';
-  if(v <= 3) return 'c98a1f';
+  if(v <= 3) return 'd4a017';
   return 'c0392b';
 }
 function statusPalette(hex){
   const k = (hex||'').toLowerCase();
   if(k === '2f9e52' || k === '499d61') return {text:'1C6E39', fill:'DDF5E7'};
-  if(k === 'c98a1f') return {text:'966900', fill:'FFF2BE'};
+  if(k === 'd4a017') return {text:'8a6500', fill:'FFF4C2'};
   if(k === 'c0392b') return {text:'962323', fill:'FCE4E4'};
   return {text:'69737D', fill:'EEF1F5'};
 }
@@ -1406,6 +1406,49 @@ function recolorNamedTextbox(xml, shapeName, hexColor){
   const escName = shapeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const re = new RegExp('(<p:sp>(?:(?!</p:sp>)[\\s\\S])*?name="' + escName + '"(?:(?!</p:sp>)[\\s\\S])*?</p:sp>)');
   return xml.replace(re, (block) => block.replace(/(<a:rPr[^>]*>\s*<a:solidFill><a:srgbClr val=")[0-9A-Fa-f]{6}/, '$1' + hexColor));
+}
+
+
+// Çubuk grafiklerin (3 AYLIK PERFORMANS ÖZETİ) altına eşik ve renklendirme açıklaması ekler.
+// 1. sayfa (Modül 1): aşım sayıları; 2. sayfa (Modül 4): oranlar.
+function legendShapeXml(id, x, y, cx, cy, lines){
+  const run = (t, c, b) => `<a:r><a:rPr lang="tr-TR" sz="800" b="${b?1:0}" dirty="0"><a:solidFill><a:srgbClr val="${c}"/></a:solidFill><a:latin typeface="Arial"/><a:cs typeface="Arial"/></a:rPr><a:t>${escapeXml(t)}</a:t></a:r>`;
+  const paras = lines.map(l => `<a:p><a:pPr algn="l"/>${l.map(p => run(p[0], p[1], p[2])).join('')}</a:p>`).join('');
+  return `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="Esik Aciklama ${id}"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>`+
+    `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>`+
+    `<p:txBody><a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" anchor="t"><a:noAutofit/></a:bodyPr><a:lstStyle/>${paras}</p:txBody></p:sp>`;
+}
+const LG_GRI = '55606B', LG_YESIL = '1C6E39', LG_SARI = '8A6500', LG_KIRMIZI = '962323';
+const LG_ORAN_RENK = [['Renk: ', LG_GRI, true], ['● %95–100 yeşil', LG_YESIL, true], ['  ● %90–95 sarı', LG_SARI, true], ['  ● %90 altı kırmızı', LG_KIRMIZI, true]];
+function addBarLegends(zip){
+  const paths = Object.keys(zip.files).filter(p => /^ppt\/slides\/slide\d+\.xml$/.test(p) && p !== 'ppt/slides/slide1.xml');
+  return Promise.all(paths.map(async path => {
+    let xml = await zip.file(path).async('string');
+    if(xml.includes('Esik Aciklama')) return;
+    if(!xml.includes('3 AYLIK PERFORMANS')) return;
+    let id = Math.max(0, ...[...xml.matchAll(/<p:cNvPr id="(\d+)"/g)].map(m => +m[1])) + 1;
+    const add = [];
+    if(xml.includes('HASTANE TESLİM')){
+      // 2. sayfa: üç oran kartı (Hastane Teslim, Akıllı Bileklik, 24 saatte Vaka Kapatma)
+      const kart = [
+        [603504, 'Eşik: hastanede kalış ≤900 sn (15 dk)'],
+        [4215384, 'Eşik: her hastaya akıllı bileklik takılması'],
+        [7845552, 'Eşik: vakanın 24 saat içinde kapatılması']
+      ];
+      for(const [x, esik] of kart)
+        add.push(legendShapeXml(id++, x, 6135000, 3017520, 420000, [[[esik, LG_GRI, false]], LG_ORAN_RENK]));
+    } else if(xml.includes('KENTSEL') && xml.includes('KIRSAL')){
+      // 1. sayfa: Kentsel / Kırsal / Reaksiyon eşik aşım sayıları
+      add.push(legendShapeXml(id++, 393192, 5415000, 6900000, 400000, [
+        [['Eşik (çubuk = eşiği aşan vaka sayısı): Kentsel >600 sn · Kırsal >1800 sn · Reaksiyon >90 sn', LG_GRI, false]],
+        [['Renk: ', LG_GRI, true], ['● 0 yeşil', LG_YESIL, true], ['   ● 1–3 sarı', LG_SARI, true], ['   ● 4 ve üzeri kırmızı', LG_KIRMIZI, true],
+         ['      Reaksiyon oranı %: ≤2 yeşil · 2–5 sarı · >5 kırmızı', LG_GRI, false]]
+      ]));
+    }
+    if(!add.length) return;
+    xml = xml.replace('</p:spTree>', add.join('') + '</p:spTree>');
+    zip.file(path, xml);
+  }));
 }
 
 async function fillPage1Table(zip, months){
@@ -2082,6 +2125,9 @@ async function generatePresentation2(){
 
     // --- 2. sayfa (Modül 4 oran özeti) doldur ---
     const ratioResult = await fillPage2Ratios(zip, months, modul4Hist);
+
+    // --- Çubuk grafiklerin altına eşik ve renk açıklaması ---
+    await addBarLegends(zip);
 
     await removeConflictingNotesRelationships(zip);
     await sanitizePackageIds(zip);
